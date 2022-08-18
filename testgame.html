@@ -11,24 +11,79 @@ canvas {
 </head>
 <body onload="startGame()">
 <script>
-
-function startGame() {
-	myGameArea.start();
+	
+var myGamePiece;
+var myGameArea = { 		// This array holds the play area
+	canvas : document.createElement("canvas"), // Create a canvas
+	start : function() {
+		this.canvas.width = 480; 
+		this.canvas.height = 270;
+		this.context = this.canvas.getContext("2d"); // Contextualizing canvas defines available commands? Unsure tbh.
+		document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Some kind of init for canvas... beyond me for now.
+		this.interval = setInterval(updateGameArea, 20);
+	},
+	clear : function() {
+		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	}
 }
 
-var myGameArea = {
-	canvas : document.createElement("canvas"),
-	start : function() {
-		this.canvas.width = 480;
-		this.canvas.height = 270;
-		this.context = this.canvas.getContext("2d");
-		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+function startGame() { // Start the game, duh
+	myGameArea.start(); 
+	myGamePiece = new component(30, 30, "green", 10, 120); // Initialize a piece
+}
+
+function component(width, height, color, x, y) { // Function to create a game piece
+	this.width = width;
+	this.height = height;
+	this.x = x;
+	this.y = y;
+	this.speedX = 0;
+	this.speedY = 0;
+	this.update = function(){
+		ctx = myGameArea.context;
+		ctx.fillStyle = color;
+		ctx.fillRect(this.x, this.y, this.width, this.height);
 	}
+	this.newPos = function(){
+		this.x += this.speedX;
+		this.y += this.speedY;
+	}
+}
+
+function updateGameArea(){
+	myGameArea.clear();
+	myGamePiece.newPos();
+	myGamePiece.update();
+}
+
+function moveup(){
+	myGamePiece.speedY -= 1;
+}
+	
+function movedown(){
+	myGamePiece.speedY += 1;
+}
+	
+function moveleft(){
+	myGamePiece.speedX -= 1;
+}
+function moveright(){
+	myGamePiece.speedX += 1;
+}
+
+function stopmove(){ 
+	myGamePiece.speedX = 0;
+	myGamePiece.speedY = 0;
 }
 
 </script>
 
-<p>We have created a game area! (or at least an empty canvas)</p>
+<button onmousedown="moveup()" ontouchstart="moveup()" onmouseup="stopmove()">UP</button>
+<button onmousedown="movedown()" ontouchstart="movedown()" onmouseup="stopmove()">DOWN</button>
+<button onmousedown="moveleft()" ontouchstart="moveleft()" onmouseup="stopmove()">LEFT</button>
+<button onmousedown="moveright()" ontouchstart="moveright()" onmouseup="stopmove()">RIGHT</button>
+	
+<p>Work, Work...</p>
 
 </body>
 </html>
