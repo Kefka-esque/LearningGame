@@ -10,10 +10,14 @@ canvas {
 </style>
 </head>
 <body onload="startGame()">
+<!-- Yes, all this js code should probably be in it's own js file, 
+but as this is just a learning exercise, I'll keep it in the html doc -->
 <script>
 	
-var myGamePiece;
-var myGameArea = { 		// This array holds the play area
+var myGamePiece; // Player
+var myObstacles = []; // Obstacles
+var score;
+var myGameArea = { 		// This holds the play area
 	canvas : document.createElement("canvas"), // Create a canvas
 	start : function() {
 		this.canvas.width = 480; 
@@ -21,58 +25,118 @@ var myGameArea = { 		// This array holds the play area
 		this.context = this.canvas.getContext("2d"); // Contextualizing canvas defines available commands? Unsure tbh.
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Some kind of init for canvas... beyond me for now.
 		this.interval = setInterval(updateGameArea, 20);
-		window.addEventListener('keydown', function (e) {
-			myGameArea.key = e.keyCode;
+		this.frameNum = 0;
+		window.addEventListener('keydown', function (e) { // Listen for keypress...
+			myGameArea.key = (myGameArea.key || []);
+			myGameArea.key[e.keyCode] = true;
 		})
-		window.addEventListener('keyup', function (e) {
-			myGameArea.key = false;
+		window.addEventListener('keyup', function (e) {   // ...and react to keypress ending
+			myGameArea.key[e.keyCode] = false; // For some reason this throws an error. It works though.
 		})
 	},
-	clear : function() {
+	clear : function() { // Clear the canvas so pieces can be moved
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+	},
+	stop : function() { // Game over
+		clearInterval(this.interval);
+		alert('You Suck!');
 	}
 }
 
-function startGame() { // Start the game, duh
-	myGameArea.start(); 
-	myGamePiece = new component(30, 30, "green", 10, 120); // Initialize a piece
+function everyInterval(n) {  // For doing something every n frames
+	if ((myGameArea.frameNum / n) % 1 == 0){
+		return true;}
+	return false;
 }
 
-function component(width, height, color, x, y) { // Function to create a game piece
-	this.width = width;
+function startGame() { // Initialize the game
+	myGameArea.start(); 
+	myGamePiece = new component(30, 30, "red", 10, 120); // Player
+	//score = new component("30px", "Consolas", "black", 280, 40, "text")
+}
+
+function component(width, height, color, x, y, type) { // Constructor for elements on the canvas,
+	this.width = width; // Dimensions for size		      used for game pieces and the scoreboard
 	this.height = height;
-	this.x = x;
+	this.x = x; // Position on the canvas
 	this.y = y;
 	this.speedX = 0;
 	this.speedY = 0;
-	this.update = function(){
+	this.update = function(){ // Draw our game piece
 		ctx = myGameArea.context;
-		ctx.fillStyle = color;
-		ctx.fillRect(this.x, this.y, this.width, this.height);
+		if (this.type == "text") {
+			ctx.font = this.width + " " + this.height;
+			ctx.fillStyle = color;
+			ctx.fillText(this.text, this.x, this.y);
+		} else {
+			ctx.fillStyle = color;
+			ctx.fillRect(this.x, this.y, this.width, this.height);
+		}
 	}
-	this.newPos = function(){
+	this.newPos = function(){ // For moving a piece
 		this.x += this.speedX;
 		this.y += this.speedY;
+	}
+	this.crashWith = function(otherobj){  // Function to determine if pieces collide. It assumes pieces have
+		var myleft = this.x;			  // collided, but returns false if their positions don't overlap
+		var myright = this.x + this.width;
+		var mytop = this.y;
+		var mybottom = this.y + this.height;
+		var otherleft = otherobj.x;
+		var otherright = otherobj.x + otherobj.width;
+		var othertop = otherobj.y;
+		var otherbottom = otherobj.y + otherobj.height;
+		var crash = true;
+		if ((mybottom < othertop) ||
+			(mytop > otherbottom) ||
+			(myright < otherleft) ||
+			(myleft > otherright)) {
+				crash = false;
+		}
+		return crash;
 	}
 }
 
 function updateGameArea(){
-	myGameArea.clear();
-	myGamePiece.speedX = 0;
+	var x, height, gap, minHeight, maxHeight, minGap, maxGap; // We'll need these later on in this func
+	for(i = 0; i < myObstacles.length; i += 1){ // Check for collision with any obstacle in play
+		if (myGamePiece.crashWith(myObstacles[i])) {
+			myGameArea.stop();
+			return;
+		}
+	}
+	myGameArea.clear(); // Clear the canvas
+	myGameArea.frameNum++;
+	if (myGameArea.frameNum == 1 || everyInterval(150)) { // Spawn an obstacle every 3 seconds (150 frames),
+		x = myGameArea.canvas.width;					  // and also spawn one initially
+		minHeight = 20;
+		maxHeight = 200;
+		height = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
+		minGap = 50;
+		maxGap = 200;
+		gap = Math.floor(Math.random()*(maxGap-minGap+1) + minGap);
+		myObstacles.push(new component(10, height, "green", x, 0));
+		myObstacles.push(new component(10, x - height - gap, "green", x, height+gap));
+	}
+	for (i = 0; i< myObstacles.length; i++) { // Move our obstacles
+		myObstacles[i].x -= 1;
+		myObstacles[i].update();
+	}
+	myGamePiece.speedX = 0; // Reset piece speed
 	myGamePiece.speedY = 0;
-	if (myGameArea.key && myGameArea.key == 37) {
-		myGamePiece.speedX = -1; }
-	if (myGameArea.key && myGameArea.key == 39) {
+	if (myGameArea.key && myGameArea.key[37]) { // Check for keypresses from arrow keys
+		myGamePiece.speedX = -1; }				  // and change piece speed to suit
+	if (myGameArea.key && myGameArea.key[39]) {
 		myGamePiece.speedX = 1; }
-	if (myGameArea.key && myGameArea.key == 38) {
+	if (myGameArea.key && myGameArea.key[38]) {
 		myGamePiece.speedY = -1; }
-	if (myGameArea.key && myGameArea.key == 40) {
+	if (myGameArea.key && myGameArea.key[40]) {
 		myGamePiece.speedY = 1; }
-	myGamePiece.newPos();
-	myGamePiece.update();
+	myGamePiece.newPos(); // Move player based on speed value
+	myGamePiece.update(); // Redraw player based on new position
 }
 
-function moveup(){
+function moveup(){				// These functions are for the movement buttons on screen, deprecated
 	myGamePiece.speedY -= 1;
 }
 	
@@ -93,13 +157,14 @@ function stopmove(){
 }
 
 </script>
-
+<!-- buttons for moving player, still works  but deprecated as keyboard input works now --> 
 <button onmousedown="moveup()" ontouchstart="moveup()" onmouseup="stopmove()">UP</button>
 <button onmousedown="movedown()" ontouchstart="movedown()" onmouseup="stopmove()">DOWN</button>
 <button onmousedown="moveleft()" ontouchstart="moveleft()" onmouseup="stopmove()">LEFT</button>
 <button onmousedown="moveright()" ontouchstart="moveright()" onmouseup="stopmove()">RIGHT</button>
 	
-<p>Need to add keyboard buttons for contol. Work, Work...</p>
+<p>Add score and add a horizontal obstacle every 1000 frames or something. 
+	Work, Work...</p> <!-- Be happy to! -->
 
 </body>
 </html>
