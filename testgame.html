@@ -49,20 +49,21 @@ function everyInterval(n) {  // For doing something every n frames
 	return false;
 }
 
-function startGame() { // Initialize the game
-	myGameArea.start(); 
+function startGame() { // Initialize the game 
 	myGamePiece = new component(30, 30, "red", 10, 120); // Player
-	//score = new component("30px", "Consolas", "black", 280, 40, "text")
+	score = new component("30px", "Consolas", "black", 280, 40, "text");
+	myGameArea.start();
 }
 
-function component(width, height, color, x, y, type) { // Constructor for elements on the canvas,
-	this.width = width; // Dimensions for size		      used for game pieces and the scoreboard
+function component(width, height, color, x, y, type) { // Constructor for elements on the canvas
+	this.type = type;
+	this.width = width; // Dimensions for size		      
 	this.height = height;
 	this.x = x; // Position on the canvas
 	this.y = y;
 	this.speedX = 0;
 	this.speedY = 0;
-	this.update = function(){ // Draw our game piece
+	this.update = function(){ // Draw on the canvas
 		ctx = myGameArea.context;
 		if (this.type == "text") {
 			ctx.font = this.width + " " + this.height;
@@ -98,7 +99,7 @@ function component(width, height, color, x, y, type) { // Constructor for elemen
 }
 
 function updateGameArea(){
-	var x, height, gap, minHeight, maxHeight, minGap, maxGap; // We'll need these later on in this func
+	var x, y, height, gap, minHeight, maxHeight, minGap, maxGap; // We'll need these later on in this func
 	for(i = 0; i < myObstacles.length; i += 1){ // Check for collision with any obstacle in play
 		if (myGamePiece.crashWith(myObstacles[i])) {
 			myGameArea.stop();
@@ -118,20 +119,38 @@ function updateGameArea(){
 		myObstacles.push(new component(10, height, "green", x, 0));
 		myObstacles.push(new component(10, x - height - gap, "green", x, height+gap));
 	}
+	/*if (everyInterval(500)) { // Every 10 seconds (500 frames) spawn a horizontal obstacle - NOT WORKING YET
+		y = 0; // width height color x y
+		minHeight = 20;
+		maxHeight = 200;
+		height = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
+		minGap = 50;
+		maxGap = 200;
+		gap = Math.floor(Math.random()*(maxGap-minGap+1) + minGap);
+		myObstacles.push(new component(height, 10, "blue", 0, y), "boss");
+		myObstacles.push(new component(y - height - gap, 10, "blue", height+gap, y, "boss")); 
+	} */
 	for (i = 0; i< myObstacles.length; i++) { // Move our obstacles
-		myObstacles[i].x -= 1;
+		if (myObstacles[i].type == "boss") { // If it is a boss piece it needs to move down not left
+			myObstacles[i].y -=1;
+		} else{
+		
+			myObstacles[i].x -= 1; //
+			}
 		myObstacles[i].update();
 	}
 	myGamePiece.speedX = 0; // Reset piece speed
 	myGamePiece.speedY = 0;
 	if (myGameArea.key && myGameArea.key[37]) { // Check for keypresses from arrow keys
-		myGamePiece.speedX = -1; }				  // and change piece speed to suit
+		myGamePiece.speedX = -1; }				// and change piece speed to suit
 	if (myGameArea.key && myGameArea.key[39]) {
 		myGamePiece.speedX = 1; }
 	if (myGameArea.key && myGameArea.key[38]) {
 		myGamePiece.speedY = -1; }
 	if (myGameArea.key && myGameArea.key[40]) {
 		myGamePiece.speedY = 1; }
+	score.text="SCORE: " + myGameArea.frameNum;
+	score.update();
 	myGamePiece.newPos(); // Move player based on speed value
 	myGamePiece.update(); // Redraw player based on new position
 }
