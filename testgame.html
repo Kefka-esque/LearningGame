@@ -11,7 +11,8 @@ canvas {
 </head>
 <body onload="startGame()">
 <!-- Yes, all this js code should probably be in it's own js file, 
-but as this is just a learning exercise, I'll keep it in the html doc -->
+but as this is just a learning exercise, I'll keep it in the html doc for now.
+Once finalized, clean it up!!!-->
 <script>
 	
 var myGamePiece; // Player
@@ -22,7 +23,7 @@ var myGameArea = { 		// This holds the play area
 	start : function() {
 		this.canvas.width = 480; 
 		this.canvas.height = 270;
-		this.context = this.canvas.getContext("2d"); // Contextualizing canvas defines available commands? Unsure tbh.
+		this.context = this.canvas.getContext("2d"); // Contextualizing canvas for 2d defines available commands
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Some kind of init for canvas... beyond me for now.
 		this.interval = setInterval(updateGameArea, 20);
 		this.frameNum = 0;
@@ -99,7 +100,7 @@ function component(width, height, color, x, y, type) { // Constructor for elemen
 }
 
 function updateGameArea(){
-	var x, y, height, gap, minHeight, maxHeight, minGap, maxGap; // We'll need these later on in this func
+	var x, y, size, gap, minHeight, maxHeight, minGap, maxGap; // We'll need these later on in this func
 	for(i = 0; i < myObstacles.length; i += 1){ // Check for collision with any obstacle in play
 		if (myGamePiece.crashWith(myObstacles[i])) {
 			myGameArea.stop();
@@ -112,34 +113,34 @@ function updateGameArea(){
 		x = myGameArea.canvas.width;					  // and also spawn one initially
 		minHeight = 20;
 		maxHeight = 200;
-		height = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
+		size = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
 		minGap = 50;
 		maxGap = 200;
 		gap = Math.floor(Math.random()*(maxGap-minGap+1) + minGap);
-		myObstacles.push(new component(10, height, "green", x, 0));
-		myObstacles.push(new component(10, x - height - gap, "green", x, height+gap));
+		myObstacles.push(new component(10, size, "green", x, 0));
+		myObstacles.push(new component(10, x - size - gap, "green", x, size+gap));
 	}
-	/*if (everyInterval(500)) { // Every 10 seconds (500 frames) spawn a horizontal obstacle - NOT WORKING YET
-		y = 0; // width height color x y
+	if (everyInterval(500)) { // Every 10 seconds (500 frames) spawn a horizontal obstacle 
+		y = myGameArea.canvas.height; // width height color x y
 		minHeight = 20;
 		maxHeight = 200;
-		height = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
+		size = Math.floor(Math.random()*(maxHeight-minHeight+1) + minHeight);
 		minGap = 50;
-		maxGap = 200;
+		maxGap = 100;
 		gap = Math.floor(Math.random()*(maxGap-minGap+1) + minGap);
-		myObstacles.push(new component(height, 10, "blue", 0, y), "boss");
-		myObstacles.push(new component(y - height - gap, 10, "blue", height+gap, y, "boss")); 
-	} */
+		myObstacles.push(new component(size, 10, "blue", 0, 0, "boss"));
+		myObstacles.push(new component(y - size - gap, 10, "blue", size + gap, , "boss")); // This doesn't work properly
+	} 
 	for (i = 0; i< myObstacles.length; i++) { // Move our obstacles
 		if (myObstacles[i].type == "boss") { // If it is a boss piece it needs to move down not left
-			myObstacles[i].y -=1;
+			myObstacles[i].y +=1;
 		} else{
 		
 			myObstacles[i].x -= 1; //
 			}
 		myObstacles[i].update();
 	}
-	myGamePiece.speedX = 0; // Reset piece speed
+	myGamePiece.speedX = 0; // Reset player speed
 	myGamePiece.speedY = 0;
 	if (myGameArea.key && myGameArea.key[37]) { // Check for keypresses from arrow keys
 		myGamePiece.speedX = -1; }				// and change piece speed to suit
@@ -182,8 +183,7 @@ function stopmove(){
 <button onmousedown="moveleft()" ontouchstart="moveleft()" onmouseup="stopmove()">LEFT</button>
 <button onmousedown="moveright()" ontouchstart="moveright()" onmouseup="stopmove()">RIGHT</button>
 	
-<p>Add score and add a horizontal obstacle every 1000 frames or something. 
-	Work, Work...</p> <!-- Be happy to! -->
+<p>Fix sizing for boss pieces. Work, Work...</p> <!-- Be happy to! -->
 
 </body>
 </html>
