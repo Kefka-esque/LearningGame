@@ -7,8 +7,8 @@ The player controls a red square with the arrow keys and must dodge obstacles fr
 ## Features
 
 This is a list of features not included in the W3 tutorial that I added myself once I was more comfortable with the language:
-- Every 10 seconds an obstacle spawns from the top of the play area. *Needs polish, almost finished. Plan is to change to a randomized timeframe*
-- Every 20 seconds, the difficulty increases *To do*
-- As difficulty increases, score multiplier goes up. *To do*
+- Every 8-11 seconds an obstacle spawns from the top of the play area. *DONE*
+- Every boss obstacle after the first increases the difficulty *DONE*
+- As difficulty increases, score multiplier goes up. *DONE*
 
 
