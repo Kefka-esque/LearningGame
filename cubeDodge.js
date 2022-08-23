@@ -1,4 +1,4 @@
-	
+var gameStarted = false; // For having the player start the game, see bottom of this doc for use.
 var myGamePiece; // Player
 var myObstacles = []; // Obstacles
 var score;
@@ -31,6 +31,7 @@ var myGameArea = { 		// Object for the play area
 		sound.play();
 		clearInterval(this.interval);
 		alert('Game Over! Final Score: ' + (myGameArea.frameNum * myGameArea.difficulty));
+		
 	}
 }
 
@@ -95,6 +96,11 @@ function updateGameArea(){
 	for(i = 0; i < myObstacles.length; i += 1){ // Check for collision with any obstacle in play
 		if (myGamePiece.crashWith(myObstacles[i])) {
 			myGameArea.stop();
+			return;
+		}
+		if (myGamePiece.x > myGameArea.canvas.width){ // Make sure player hasn't gone way off hte right side of the canvas (anywhere else is fair game)
+			myGameArea.stop();
+			myGameArea.cheater = true;
 			return;
 		}
 	}
@@ -170,3 +176,10 @@ function stopmove(){
 	myGamePiece.speedX = 0;
 	myGamePiece.speedY = 0;
 }
+
+document.addEventListener('keyup', event => {
+  if (event.code === 'Space' && gameStarted == false) {
+    startGame();
+	gameStarted = true;
+  }
+})
