@@ -7,11 +7,11 @@ var myGameArea = { 		// Object for the play area
 	music : document.getElementById("music"),
 	start : function() {
 		this.difficulty = 1; // For determining speed of player and obstacles, increases as more boss pieces spawn (not counting hte first)
-		this.bossInterval = (Math.floor(Math.random() * (12 - 8) + 8) * 100) / 2;
+		this.bossInterval = (Math.floor(Math.random() * (12 - 8) + 8) * 100) / 2; // Determines the frame the first boss spawns
 		this.canvas.width = 480; 
 		this.canvas.height = 270;
 		this.context = this.canvas.getContext("2d"); // Contextualizing canvas for 2d defines available commands
-		document.body.insertBefore(this.canvas, document.body.childNodes[0]); // Some kind of init for canvas... beyond me for now.
+		document.body.insertBefore(this.canvas, document.body.childNodes[0]); 
 		this.interval = setInterval(updateGameArea, 20);
 		this.frameNum = 0;
 		window.addEventListener('keydown', function (e) { // Listen for keypress...
@@ -56,6 +56,8 @@ function component(width, height, color, x, y, type) { // Constructor for elemen
 	this.y = y;
 	this.speedX = 0;
 	this.speedY = 0;
+	this.offScreen = false;
+	this.offScreenFrameNum;
 	this.update = function(){ // Draw on the canvas
 		ctx = myGameArea.context;
 		if (this.type == "text") {
@@ -98,12 +100,19 @@ function updateGameArea(){
 			myGameArea.stop();
 			return;
 		}
-		if (myGamePiece.x > myGameArea.canvas.width){ // Make sure player hasn't gone way off hte right side of the canvas (anywhere else is fair game)
-			myGameArea.stop();
-			myGameArea.cheater = true;
-			return;
-		}
 	}
+	if (myGamePiece.x > myGameArea.canvas.width ||
+		myGamePiece.x < 0 ||
+		myGamePiece.y > myGameArea.canvas.height ||
+		myGamePiece.y < 0) { 
+			if(myGamePiece.offScreen == false){
+				myGamePiece.offScreen = true;
+				myGamePiece.offScreenFrame = myGameArea.frameNum;
+			}
+		if(myGamePiece.offScreen == true && myGameArea.frameNum == (myGamePiece.offScreenFrame + 200)) { // If player piece has been offscreen for 4 seconds
+			myGameArea.stop();
+		}
+	} 
 	myGameArea.clear(); // Clear the canvas
 	myGameArea.frameNum++;
 	if (myGameArea.frameNum == 1 || everyInterval(150)) { // Spawn an obstacle every 3 seconds (150 frames),
@@ -126,7 +135,7 @@ function updateGameArea(){
 		maxGap = 100;
 		gap = Math.floor(Math.random()*(maxGap-minGap+1) + minGap);
 		myObstacles.push(new component(size, 10, "blue", 0, 0, "boss")); // reminder: component(width height color x y type)
-		myObstacles.push(new component(y - size - gap, 10, "blue", size + gap, 0, "boss")); // This doesn't work properly
+		myObstacles.push(new component(y - size - gap, 10, "blue", size + gap, 0, "boss")); 
 		myGameArea.bossInterval += (Math.floor(Math.random() * (15 - 8) + 8) * 100) / 2; // Determine next frame to spawn a boss piece
 		if (myGameArea.frameNum > 550) { // Check that at least one boss piece has been spawned
 			myGameArea.difficulty++; // Increase speed of pieces based on difficulty
@@ -176,7 +185,7 @@ function stopmove(){
 	myGamePiece.speedX = 0;
 	myGamePiece.speedY = 0;
 }
-
+// Hit space to start, fixes music not playing
 document.addEventListener('keyup', event => {
   if (event.code === 'Space' && gameStarted == false) {
     startGame();

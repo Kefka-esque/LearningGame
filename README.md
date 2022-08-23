@@ -11,7 +11,8 @@ This is a list of features not included in the W3 tutorial that I added myself o
 - Every boss obstacle after the first increases the difficulty 
 - As difficulty increases, score multiplier goes up.
 - Losing the game triggers a familiar sound
-- music added
+- Music added
+- The game will end if the player is off-screen for more than four seconds
 - A high score list that is displayed under the game canvas that is updated *todo*
 
 ## Legal(ish) Note
