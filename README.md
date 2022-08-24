@@ -1,6 +1,6 @@
 # Simple js Game
 
-A simple javascript game created using a js tutorial on W3schools as a fun learning exercise. I have plans for another more complex game, but needed something a little more digestable as a first project in js. 
+A simple javascript game created using a js tutorial on W3schools as a template. This is mostly just a fun learning exercise. I have plans for another more complex game, but needed something a little more digestable as a first project in js. 
 
 The player controls a red square with the arrow keys and must dodge obstacles from the right side of the screen, as well as occasional "boss" obstacles from the top of the screen
 
